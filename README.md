@@ -25,9 +25,10 @@ $ composer require freezy-bee/mail-chimp
 Documentation
 ------------
 
-Learn how to authenticate the user using mojeID in 
+Learn how to use MailChimp API in 
 [EN](https://github.com/FreezyBee/MailChimp/blob/master/docs/en/index.md)
-documentation.
+documentation or 
+official [MailChimp API] (http://developer.mailchimp.com/documentation/mailchimp/).
 
 
 
