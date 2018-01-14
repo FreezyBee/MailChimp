@@ -3,12 +3,10 @@
 namespace FreezyBee\MailChimp;
 
 use FreezyBee\MailChimp\Http\Resource;
-
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
-
-use Nette\Object;
+use Nette\SmartObject;
 use Nette\Utils\Json;
 use Nette\Utils\JsonException;
 
@@ -16,8 +14,10 @@ use Nette\Utils\JsonException;
  * Class Api
  * @package FreezyBee\MailChimp
  */
-class Api extends Object
+class Api
 {
+    use SmartObject;
+
     /** @var \Closure */
     public $onResponse;
 

@@ -4,7 +4,7 @@ namespace FreezyBee\MailChimp\Diagnostics;
 
 use FreezyBee\MailChimp\Api;
 use FreezyBee\MailChimp\Http\Resource;
-use Nette\Object;
+use Nette\SmartObject;
 use Tracy\Debugger;
 use Tracy\IBarPanel;
 
@@ -12,8 +12,10 @@ use Tracy\IBarPanel;
  * Class Panel
  * @package FreezyBee\MailChimp\Diagnostics
  */
-class Panel extends Object implements IBarPanel
+class Panel implements IBarPanel
 {
+    use SmartObject;
+
     /**
      * @var Resource[]
      */
@@ -63,19 +65,13 @@ class Panel extends Object implements IBarPanel
     }
 
     /**
-     * @param Resource $resource
-     */
-    public function finish(Resource $resource)
-    {
-        $this->resources[] = $resource;
-    }
-
-    /**
      * @param Api $api
      */
     public function register(Api $api)
     {
-        $api->onResponse[] = $this->finish;
+        $api->onResponse[] = function (Resource $resource) {
+            $this->resources[] = $resource;
+        };
 
         Debugger::getBar()->addPanel($this);
     }

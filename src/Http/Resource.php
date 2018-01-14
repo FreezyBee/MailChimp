@@ -6,7 +6,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use Nette\Object;
+use Nette\SmartObject;
 use Nette\Utils\Json;
 use Nette\Utils\JsonException;
 
@@ -14,8 +14,10 @@ use Nette\Utils\JsonException;
  * Class Resource
  * @package FreezyBee\MailChimp\Http
  */
-class Resource extends Object
+class Resource
 {
+    use SmartObject;
+
     /**
      * @var Request
      */
