@@ -8,11 +8,7 @@
     "MailChimp"
   ],
   "homepage": "http://freezybee.ifire.cz",
-  "license": [
-    "BSD-3-Clause",
-    "GPL-2.0",
-    "GPL-3.0"
-  ],
+  "license": "MIT",
   "authors": [
     {
       "name": "Jakub Janata",
@@ -20,17 +16,20 @@
     }
   ],
   "require": {
+    "php": "^7.1",
     "nette/application": "^2.4",
-    "guzzlehttp/guzzle": "^6.0",
-    "tracy/tracy": "^2.4",
+    "freezy-bee/httplug": "^1.0",
     "nette/di": "^2.4"
+  },
+  "require-dev": {
+    "php-http/guzzle6-adapter": "^1.1",
+    "nette/bootstrap": "^2.4",
+    "tracy/tracy": "^2.5",
+    "phpstan/phpstan-shim": "^0.10.2"
   },
   "autoload": {
     "psr-4": {
       "FreezyBee\\MailChimp\\": "src/"
-    },
-    "classmap": [
-      "src/exceptions.php"
-    ]
+    }
   }
 }

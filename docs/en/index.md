@@ -11,11 +11,12 @@ The best way to install FreezyBee/MailChimp is using  [Composer](http://getcompo
 $ composer require freezy-bee/mail-chimp
 ```
 
-With Nette `2.3` and newer, you can enable the extension using your neon config.
+config.local.neon
 
 ```yml
 extensions:
-	mailChimp: FreezyBee\MailChimp\DI\MailChimpExtension
+    httplug: FreezyBee\Httplug\DI\HttplugExtension
+    mailChimp: FreezyBee\MailChimp\DI\MailChimpExtension
 ```
 
 Minimal configuration
@@ -23,14 +24,8 @@ Minimal configuration
 
 ```yml
 mailChimp:
-	apiKey: **your api key** # more info https://admin.mailchimp.com/account/api/
+    apiKey: **your api key** # more info https://admin.mailchimp.com/account/api/
 ```
-
-
-Debugging
----------
-
-The extension monitors request and response, when in debug mode. All that information is available in Tracy panel
 
 
 

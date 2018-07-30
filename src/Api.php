@@ -1,38 +1,35 @@
 <?php
+declare(strict_types=1);
 
 namespace FreezyBee\MailChimp;
 
-use FreezyBee\MailChimp\Http\Resource;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Psr7\Request;
+use Http\Client\HttpClient;
+use Http\Message\RequestFactory;
 use Nette\SmartObject;
 use Nette\Utils\Json;
 use Nette\Utils\JsonException;
 
 /**
- * Class Api
- * @package FreezyBee\MailChimp
+ * @author Jakub Janata <jakubjanata@gmail.com>
  */
 class Api
 {
     use SmartObject;
 
-    /** @var \Closure */
-    public $onResponse;
+    /** @var HttpClient */
+    private $client;
+
+    /** @var RequestFactory */
+    private $requestFactory;
 
     /**
-     * @var array config
+     * @param HttpClient $client
+     * @param RequestFactory $requestFactory
      */
-    private $config;
-
-    /**
-     * Api constructor.
-     * @param array $config
-     */
-    public function __construct(array $config)
+    public function __construct(HttpClient $client, RequestFactory $requestFactory)
     {
-        $this->config = $config;
+        $this->requestFactory = $requestFactory;
+        $this->client = $client;
     }
 
     /**
@@ -44,43 +41,28 @@ class Api
      */
     public function call($method = 'GET', $endpoint = '', array $parameters = [])
     {
-        $uri = $this->config['apiUrl'] . (strlen($endpoint) && $endpoint[0] == '/' ? substr($endpoint, 1) : $endpoint);
-        $headers = ['Authorization' => 'apikey ' . $this->config['apiKey']];
-
         try {
             $body = $parameters ? Json::encode($parameters) : null;
         } catch (JsonException $e) {
-            throw new MailChimpException('MailChimp request - invalid json', 667, $e);
+            throw new MailChimpException($e->getMessage(), 667, $e);
         }
 
-        $client = new Client;
-        $request = new Request($method, $uri, $headers, $body);
-        $resource = new Resource($request);
+        $request = $this->requestFactory->createRequest($method, "3.0/$endpoint", [], $body);
 
         try {
-            /** @var \GuzzleHttp\Psr7\Response $response */
-            $response = $client->send($request);
-            $resource->setSuccessResponse($response);
-
-        } catch (GuzzleException $e) {
-            $resource->setErrorResponse($e);
+            $response = $this->client->sendRequest($request);
+        } catch (\Exception $e) {
+            throw new MailChimpException($e->getMessage(), 666, $e);
         }
 
-        $this->onResponse($resource);
-
-        if ($resource->getException()) {
-            throw new MailChimpException('MailChimp response - error', 666, $resource->getException());
-        } else {
-            return $resource->getResult();
+        if ($response->getStatusCode() !== 200) {
+            throw new MailChimpException($response->getBody()->getContents(), $response->getStatusCode());
         }
-    }
 
-    // TODO
-    /**
-     *
-     */
-    public function callService()
-    {
-
+        try {
+            return Json::decode($response->getBody()->getContents());
+        } catch (JsonException $e) {
+            throw new MailChimpException($e->getMessage(), 667, $e);
+        }
     }
 }

@@ -1,21 +1,24 @@
 <?php
+declare(strict_types=1);
 
 namespace FreezyBee\MailChimp\DI;
 
+use FreezyBee\Httplug\DI\IClientProvider;
 use Nette\DI\CompilerExtension;
 use Nette\Utils\AssertionException;
 use Nette\Utils\Strings;
 use Nette\Utils\Validators;
+use FreezyBee\MailChimp\Api;
 
 /**
- * Class MailChimpExtension
- * @package FreezyBee\MailChimp\DI
+ * @author Jakub Janata <jakubjanata@gmail.com>
  */
-class MailChimpExtension extends CompilerExtension
+class MailChimpExtension extends CompilerExtension implements IClientProvider
 {
     private $defaults = [
         'apiKey' => null,
-        'apiUrl' => 'https://<dc>.api.mailchimp.com/3.0/',
+        'apiUrl' => 'https://<dc>.api.mailchimp.com/',
+        'httplugFactory' => '@httplug.factory.guzzle6',
         'debugger' => '%debugMode%'
     ];
 
@@ -34,22 +37,54 @@ class MailChimpExtension extends CompilerExtension
         }
 
         Validators::assert($config['apiUrl'], 'string', 'MailChimp - missing apiUrl');
-        list(, $datacentre) = explode('-', $config['apiKey']);
+        [, $datacentre] = explode('-', $config['apiKey']);
         $config['apiUrl'] = str_replace('<dc>', $datacentre, $config['apiUrl']);
 
         Validators::assert($config['apiUrl'], 'url', 'MailChimp - wrong apiUrl');
 
+        $this->config = $config;
+
         $builder = $this->getContainerBuilder();
 
-        $api = $builder->addDefinition($this->prefix('api'))
-            ->setClass('FreezyBee\MailChimp\Api')
-            ->setArguments([$config]);
+        $builder
+            ->addDefinition($this->prefix('api'))
+            ->setFactory(Api::class)
+            ->setArguments(['@httplug.client.mailchimp']);
+    }
 
-        if ($config['debugger']) {
-            $builder->addDefinition($this->prefix('panel'))
-                ->setClass('FreezyBee\MailChimp\Diagnostics\Panel')
-                ->setInject(false);
-            $api->addSetup($this->prefix('@panel') . '::register', ['@self']);
-        }
+    /**
+     * Return array of client configs
+     * clientName:
+     *      factory: ...
+     *      plugins:
+     *          ...
+     * @return array
+     */
+    /**
+     * {@inheritdoc}
+     */
+    public function getClientConfigs(): array
+    {
+        bdump($this->config);
+        return [
+            'mailchimp' => [
+                'factory' => $this->config['httplugFactory'],
+                'plugins' => [
+                    'authentication' => [
+                        'type' => 'basic',
+                        'username' => 'user',
+                        'password' => $this->config['apiKey']
+                    ],
+                    'addHost' => [
+                        'host' => $this->config['apiUrl']
+                    ],
+                    'headerDefaults' => [
+                        'headers' => [
+                            'Content-Type' => 'application/json; charset=utf-8'
+                        ]
+                    ]
+                ]
+            ]
+        ];
     }
 }
