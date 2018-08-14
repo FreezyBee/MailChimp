@@ -55,7 +55,8 @@ class Api
             throw new MailChimpException($e->getMessage(), 666, $e);
         }
 
-        if ($response->getStatusCode() !== 200) {
+        $statusCode = $response->getStatusCode();
+        if ($statusCode < 200 || $statusCode >= 300) {
             throw new MailChimpException($response->getBody()->getContents(), $response->getStatusCode());
         }
 
