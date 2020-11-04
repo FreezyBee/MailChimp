@@ -1,46 +1,53 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FreezyBee\MailChimp\DI;
 
 use FreezyBee\Httplug\DI\IClientProvider;
+use FreezyBee\MailChimp\Api;
 use Nette\DI\CompilerExtension;
 use Nette\Utils\AssertionException;
 use Nette\Utils\Strings;
 use Nette\Utils\Validators;
-use FreezyBee\MailChimp\Api;
 
 /**
  * @author Jakub Janata <jakubjanata@gmail.com>
  */
 class MailChimpExtension extends CompilerExtension implements IClientProvider
 {
-    private $defaults = [
-        'apiKey' => null,
-        'apiUrl' => 'https://<dc>.api.mailchimp.com/',
-        'httplugFactory' => '@httplug.factory.guzzle6',
-        'debugger' => '%debugMode%'
-    ];
+    /** @var mixed */
+    protected $config;
+
+    /** @var string */
+    private $apiKey;
+
+    public function __construct(string $apiKey)
+    {
+        $this->apiKey = $apiKey;
+
+        $this->config = new class {
+            /** @var string */
+            public $apiUrl = 'https://<dc>.api.mailchimp.com/';
+
+            /** @var string */
+            public $httplugFactory = '@httplug.factory.guzzle6';
+        };
+    }
 
     public function loadConfiguration()
     {
-        $config = $this->getConfig($this->defaults);
+        $config = $this->config;
 
-        // validate apiKey
-        Validators::assert($config['apiKey'], 'string', 'MailChimp - missing apiKey');
-
-        // validate apiUrl
-        Validators::assert($config['apiUrl'], 'string', 'MailChimp - invalid apiUrl');
-
-        if (!Strings::contains($config['apiUrl'], '<dc>')) {
+        if (!Strings::contains($config->apiUrl, '<dc>')) {
             throw new AssertionException("MailChimp - missing <dc> apiUrl");
         }
 
-        Validators::assert($config['apiUrl'], 'string', 'MailChimp - missing apiUrl');
-        [, $datacentre] = explode('-', $config['apiKey']);
-        $config['apiUrl'] = str_replace('<dc>', $datacentre, $config['apiUrl']);
+        Validators::assert($config->apiUrl, 'string', 'MailChimp - missing apiUrl');
+        [, $datacentre] = explode('-', $this->apiKey);
+        $config->apiUrl = str_replace('<dc>', $datacentre, $config['apiUrl']);
 
-        Validators::assert($config['apiUrl'], 'url', 'MailChimp - wrong apiUrl');
+        Validators::assert($config->apiUrl, 'url', 'MailChimp - wrong apiUrl');
 
         $this->config = $config;
 
@@ -58,25 +65,21 @@ class MailChimpExtension extends CompilerExtension implements IClientProvider
      *      factory: ...
      *      plugins:
      *          ...
-     * @return array
-     */
-    /**
-     * {@inheritdoc}
+     * @return mixed[]
      */
     public function getClientConfigs(): array
     {
-        bdump($this->config);
         return [
             'mailchimp' => [
-                'factory' => $this->config['httplugFactory'],
+                'factory' => $this->config->httplugFactory,
                 'plugins' => [
                     'authentication' => [
                         'type' => 'basic',
                         'username' => 'user',
-                        'password' => $this->config['apiKey']
+                        'password' => $this->apiKey
                     ],
                     'addHost' => [
-                        'host' => $this->config['apiUrl']
+                        'host' => $this->config->apiUrl
                     ],
                     'headerDefaults' => [
                         'headers' => [

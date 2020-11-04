@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FreezyBee\MailChimp;
@@ -35,7 +36,7 @@ class Api
     /**
      * @param string $method
      * @param string $endpoint
-     * @param array $parameters
+     * @param mixed[] $parameters
      * @return mixed
      * @throws MailChimpException
      */

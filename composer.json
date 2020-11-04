@@ -17,19 +17,24 @@
   ],
   "require": {
     "php": "^7.1",
-    "nette/application": "^2.4",
-    "freezy-bee/httplug": "^1.0",
-    "nette/di": "^2.4"
+    "nette/application": "^3.0",
+    "freezy-bee/httplug": "^2.0",
+    "nette/di": "^3.0"
   },
   "require-dev": {
-    "php-http/guzzle6-adapter": "^1.1",
-    "nette/bootstrap": "^2.4",
-    "tracy/tracy": "^2.5",
-    "phpstan/phpstan-shim": "^0.10.2"
+    "nette/bootstrap": "^3.0",
+    "php-http/guzzle7-adapter": "^0.1",
+    "phpstan/phpstan": "^0.12",
+    "squizlabs/php_codesniffer": "^3.4",
+    "tracy/tracy": "^2.5"
   },
   "autoload": {
     "psr-4": {
       "FreezyBee\\MailChimp\\": "src/"
     }
+  },
+  "prefer-stable": true,
+  "config": {
+    "sort-packages": true
   }
 }
