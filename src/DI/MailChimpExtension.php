@@ -31,7 +31,7 @@ class MailChimpExtension extends CompilerExtension implements IClientProvider
             public $apiUrl = 'https://<dc>.api.mailchimp.com/';
 
             /** @var string */
-            public $httplugFactory = '@httplug.factory.guzzle6';
+            public $httplugFactory = '@httplug.factory.guzzle7';
         };
     }
 
@@ -45,7 +45,7 @@ class MailChimpExtension extends CompilerExtension implements IClientProvider
 
         Validators::assert($config->apiUrl, 'string', 'MailChimp - missing apiUrl');
         [, $datacentre] = explode('-', $this->apiKey);
-        $config->apiUrl = str_replace('<dc>', $datacentre, $config['apiUrl']);
+        $config->apiUrl = str_replace('<dc>', $datacentre, $config->apiUrl);
 
         Validators::assert($config->apiUrl, 'url', 'MailChimp - wrong apiUrl');
 
